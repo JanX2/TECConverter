@@ -32,14 +32,16 @@
 {
 	self = [super init];
 	
-	_from = CFStringConvertNSStringEncodingToEncoding(from);
-	_to       = CFStringConvertNSStringEncodingToEncoding(to);
-	
-	OSStatus status;
-	
-	status = TECCreateConverter(&_converter, _from, _to);
-	if (status != noErr) {
-		return nil;
+	if (self) {
+		_from = CFStringConvertNSStringEncodingToEncoding(from);
+		_to       = CFStringConvertNSStringEncodingToEncoding(to);
+		
+		OSStatus status;
+		
+		status = TECCreateConverter(&_converter, _from, _to);
+		if (status != noErr) {
+			return nil;
+		}
 	}
 	
 	return self;
