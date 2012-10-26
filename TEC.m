@@ -32,12 +32,12 @@
 {
 	self = [super init];
 	
-	from_ = CFStringConvertNSStringEncodingToEncoding(from);
-	to_       = CFStringConvertNSStringEncodingToEncoding(to);
+	_from = CFStringConvertNSStringEncodingToEncoding(from);
+	_to       = CFStringConvertNSStringEncodingToEncoding(to);
 	
 	OSStatus status;
 	
-	status = TECCreateConverter(&converter_, from_, to_);
+	status = TECCreateConverter(&_converter, _from, _to);
 	if (status != noErr) {
 		return nil;
 	}
@@ -62,7 +62,7 @@
 	unsigned char buffer[256];
 	
 	result = [NSMutableData data];
-	if (to_ == kCFStringEncodingUnicode) {
+	if (_to == kCFStringEncodingUnicode) {
 		UInt16 bom = 0xfeff;
 		[result appendBytes:&bom length:sizeof(bom)];
 	}
@@ -70,7 +70,7 @@
 	input = [source bytes];
 	inputLength = [source length];
 	for (;; ) {
-		status = TECConvertText(converter_,
+		status = TECConvertText(_converter,
 		                        input, inputLength,
 		                        &actualInputLength,
 		                        buffer, sizeof(buffer),
@@ -85,7 +85,7 @@
 			break;
 		}
 	}
-	status = TECFlushText(converter_,
+	status = TECFlushText(_converter,
 	                      buffer, sizeof(buffer),
 	                      &actualOutputLength);
 	[result appendBytes:buffer
@@ -107,7 +107,7 @@
 
 - (void)dealloc
 {
-	TECDisposeConverter(converter_);
+	TECDisposeConverter(_converter);
 	[super dealloc];
 }
 
@@ -124,19 +124,19 @@
 	ItemCount *features;
 	ItemCount numErrors, numFeatures;
 	
-	numErrors = numFeatures = numEncodings_;
+	numErrors = numFeatures = _numEncodings;
 	
-	encodings = malloc(sizeof(TextEncoding) * numEncodings_);
-	memcpy(encodings, encodings_, sizeof(TextEncoding) * numEncodings_);
+	encodings = malloc(sizeof(TextEncoding) * _numEncodings);
+	memcpy(encodings, _encodings, sizeof(TextEncoding) * _numEncodings);
 	
 	errors = malloc(sizeof(ItemCount) * numErrors);
 	features = malloc(sizeof(ItemCount) * numFeatures);
 	
-	status = TECSniffTextEncoding(sniffer_,
+	status = TECSniffTextEncoding(_sniffer,
 	                              [data bytes],
 	                              [data length],
 	                              encodings,
-	                              numEncodings_,
+	                              _numEncodings,
 	                              errors,
 	                              numErrors,
 	                              features,
@@ -148,7 +148,7 @@
 	
 	NSMutableArray *result = [NSMutableArray array];
 	int i;
-	for (i = 0; i < numEncodings_; i++) {
+	for (i = 0; i < _numEncodings; i++) {
 		NSStringEncoding e = CFStringConvertEncodingToNSStringEncoding(encodings[i]);
 		[result addObject:[NSNumber numberWithUnsignedInt:e]];
 	}
@@ -162,7 +162,7 @@
 
 - (void) clear
 {
-	TECClearSnifferContextInfo(sniffer_);
+	TECClearSnifferContextInfo(_sniffer);
 }
 
 #pragma mark Override
@@ -176,23 +176,23 @@
 	OSStatus status;
 	ItemCount actualCount;
 	
-	status = TECCountAvailableTextEncodings(&numEncodings_);
+	status = TECCountAvailableTextEncodings(&_numEncodings);
 	if (status != noErr) {
 		return nil;
 	}
 	
-	encodings_ = (TextEncoding *)malloc(sizeof(TextEncoding) * numEncodings_);
+	_encodings = (TextEncoding *)malloc(sizeof(TextEncoding) * _numEncodings);
 	
-	status = TECGetAvailableTextEncodings(encodings_,
-	                                      numEncodings_,
+	status = TECGetAvailableTextEncodings(_encodings,
+	                                      _numEncodings,
 	                                      &actualCount);
 	if (status != noErr) {
 		return nil;
 	}
 	
-	numEncodings_ = actualCount;
+	_numEncodings = actualCount;
 	
-	status = TECCreateSniffer(&sniffer_, encodings_, numEncodings_);
+	status = TECCreateSniffer(&_sniffer, _encodings, _numEncodings);
 	if (status != noErr) {
 		return nil;
 	}
@@ -202,8 +202,8 @@
 
 - (void) dealloc
 {
-	free(encodings_);
-	TECDisposeSniffer(sniffer_);
+	free(_encodings);
+	TECDisposeSniffer(_sniffer);
 	
 	[super dealloc];
 }

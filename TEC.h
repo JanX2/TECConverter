@@ -26,9 +26,9 @@
 #import <Cocoa/Cocoa.h>
 
 @interface TECConverter : NSObject {
-	TextEncoding from_;
-	TextEncoding to_;
-	TECObjectRef converter_;
+	TextEncoding _from;
+	TextEncoding _to;
+	TECObjectRef _converter;
 }
 
 - (id)initWithEncoding:(NSStringEncoding)from
@@ -41,9 +41,9 @@
 
 
 @interface TECSniffer : NSObject {
-	TextEncoding *encodings_;
-	ItemCount numEncodings_;
-	TECSnifferObjectRef sniffer_;
+	TextEncoding *_encodings;
+	ItemCount _numEncodings;
+	TECSnifferObjectRef _sniffer;
 }
 
 - (id)init;
