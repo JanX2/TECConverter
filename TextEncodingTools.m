@@ -102,16 +102,23 @@
 	
 	s = [[NSString alloc] initWithData:[self convert:source]
 							  encoding:NSUnicodeStringEncoding];
+	
+#if __has_feature(objc_arc)
+	return s;
+#else
 	return [s autorelease];
+#endif
 }
 
 #pragma mark Override
 
+#if !__has_feature(objc_arc)
 - (void)dealloc
 {
 	TECDisposeConverter(_converter);
 	[super dealloc];
 }
+#endif
 
 @end
 
@@ -202,6 +209,7 @@
 	return self;
 }
 
+#if !__has_feature(objc_arc)
 - (void)dealloc
 {
 	free(_encodings);
@@ -209,5 +217,6 @@
 	
 	[super dealloc];
 }
+#endif
 
 @end
