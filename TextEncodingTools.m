@@ -159,6 +159,12 @@
 	int i;
 	for (i = 0; i < _numEncodings; i++) {
 		NSStringEncoding e = CFStringConvertEncodingToNSStringEncoding(encodings[i]);
+#if 0 && DEBUG
+	    CFStringEncoding cfStringEncoding = CFStringConvertNSStringEncodingToEncoding(e);
+		CFStringRef cfStringEncodingName =  CFStringGetNameOfEncoding(cfStringEncoding);
+		NSString *encodingName = (__bridge NSString *)cfStringEncodingName;
+		NSLog(@"%lu: %@", errors[i], encodingName);
+#endif
 		[result addObject:[NSNumber numberWithUnsignedInteger:e]];
 	}
 	
