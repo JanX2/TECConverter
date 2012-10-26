@@ -23,12 +23,12 @@
  *
  */
 
-#import "TEC.h"
+#import "TextEncodingTools.h"
 
 @implementation TECConverter
 
 - (id)initWithEncoding:(NSStringEncoding)from
-					 to:(NSStringEncoding)to
+					to:(NSStringEncoding)to
 {
 	self = [super init];
 	
@@ -115,7 +115,7 @@
 
 @implementation TECSniffer
 
-- (NSArray *) sniff:(NSData *)data
+- (NSArray *)sniff:(NSData *)data
 {
 	OSStatus status;
 	
@@ -160,13 +160,13 @@
 	return result;
 }
 
-- (void) clear
+- (void)clear
 {
 	TECClearSnifferContextInfo(_sniffer);
 }
 
 #pragma mark Override
-- (id) init
+- (id)init
 {
 	self = [super init];
 	if (!self) {
@@ -200,7 +200,7 @@
 	return self;
 }
 
-- (void) dealloc
+- (void)dealloc
 {
 	free(_encodings);
 	TECDisposeSniffer(_sniffer);

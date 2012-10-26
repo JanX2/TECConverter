@@ -33,6 +33,7 @@
 
 - (id)initWithEncoding:(NSStringEncoding)from
 					to:(NSStringEncoding)to;
+
 - (id)initWithEncoding:(NSStringEncoding)from;
 
 - (NSData *)convert:(NSData *)source;
@@ -45,8 +46,6 @@
 	ItemCount _numEncodings;
 	TECSnifferObjectRef _sniffer;
 }
-
-- (id)init;
 
 - (NSArray *)sniff:(NSData *)data;
 - (void)clear;
