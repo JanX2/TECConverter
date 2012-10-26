@@ -128,7 +128,7 @@
 {
 	OSStatus status;
 	
-	ItemCount *encodings;
+	TextEncoding *encodings;
 	ItemCount *errors;
 	ItemCount *features;
 	ItemCount numErrors, numFeatures;
@@ -159,7 +159,7 @@
 	int i;
 	for (i = 0; i < _numEncodings; i++) {
 		NSStringEncoding e = CFStringConvertEncodingToNSStringEncoding(encodings[i]);
-		[result addObject:[NSNumber numberWithUnsignedInt:e]];
+		[result addObject:[NSNumber numberWithUnsignedInteger:e]];
 	}
 	
 	free(encodings);
