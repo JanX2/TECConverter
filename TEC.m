@@ -27,13 +27,13 @@
 
 @implementation TECConverter
 
-- (id) initWithEncoding: (NSStringEncoding) from
-                     to: (NSStringEncoding) to
+- (id)initWithEncoding:(NSStringEncoding)from
+					 to:(NSStringEncoding)to
 {
-    self = [super init];
-    
-    from_ = CFStringConvertNSStringEncodingToEncoding(from);
-    to_   = CFStringConvertNSStringEncodingToEncoding(to);
+	self = [super init];
+	
+	from_ = CFStringConvertNSStringEncodingToEncoding(from);
+	to_       = CFStringConvertNSStringEncodingToEncoding(to);
 	
 	OSStatus status;
 	
@@ -41,73 +41,73 @@
 	if (status != noErr) {
 		return nil;
 	}
-    
-    return self;
-}
-
-- (id) initWithEncoding: (NSStringEncoding) from
-{
-	self = [self initWithEncoding: from
-							   to: NSUnicodeStringEncoding];
+	
 	return self;
 }
 
-- (NSData*) convert: (NSData*) source
-{    
-    OSStatus status;
-    NSMutableData* result;
-    const unsigned char* input;
-    ByteCount inputLength;
-    ByteCount actualInputLength, actualOutputLength;
-    unsigned char buffer[256];
-    
-    result = [NSMutableData data];
-    if (to_ == kCFStringEncodingUnicode) {
-        UInt16 bom = 0xfeff;
-        [result appendBytes: &bom length: sizeof(bom)];
-    }
-    
-    input = [source bytes];
-    inputLength = [source length];
-    for (;;) {
-        status = TECConvertText(converter_,
-                                input, inputLength,
-                                &actualInputLength, 
-                                buffer, sizeof(buffer), 
-                                &actualOutputLength);
-        
-        input += actualInputLength;
-        inputLength -= actualInputLength;
-        
-        [result appendBytes: buffer
-                     length: actualOutputLength];
-        if (actualInputLength == 0) {
-            break;
-        }
-    }
-    status = TECFlushText(converter_,
-                          buffer, sizeof(buffer), 
-                          &actualOutputLength);
-    [result appendBytes: buffer
-                 length: actualOutputLength];
-    
-    return result;
+- (id)initWithEncoding:(NSStringEncoding)from
+{
+	self = [self initWithEncoding:from
+							   to:NSUnicodeStringEncoding];
+	return self;
 }
 
-- (NSString*) convertToString: (NSData*) source
+- (NSData *)convert:(NSData *)source
 {
-    NSString* s;
-    
-    s = [[NSString alloc] initWithData: [self convert: source]
-                              encoding: NSUnicodeStringEncoding];
-    return [s autorelease];
+	OSStatus status;
+	NSMutableData *result;
+	const unsigned char *input;
+	ByteCount inputLength;
+	ByteCount actualInputLength, actualOutputLength;
+	unsigned char buffer[256];
+	
+	result = [NSMutableData data];
+	if (to_ == kCFStringEncodingUnicode) {
+		UInt16 bom = 0xfeff;
+		[result appendBytes:&bom length:sizeof(bom)];
+	}
+	
+	input = [source bytes];
+	inputLength = [source length];
+	for (;; ) {
+		status = TECConvertText(converter_,
+		                        input, inputLength,
+		                        &actualInputLength,
+		                        buffer, sizeof(buffer),
+		                        &actualOutputLength);
+		
+		input += actualInputLength;
+		inputLength -= actualInputLength;
+		
+		[result appendBytes:buffer
+					 length:actualOutputLength];
+		if (actualInputLength == 0) {
+			break;
+		}
+	}
+	status = TECFlushText(converter_,
+	                      buffer, sizeof(buffer),
+	                      &actualOutputLength);
+	[result appendBytes:buffer
+				 length:actualOutputLength];
+	
+	return result;
+}
+
+- (NSString *)convertToString:(NSData *)source
+{
+	NSString *s;
+	
+	s = [[NSString alloc] initWithData:[self convert:source]
+							  encoding:NSUnicodeStringEncoding];
+	return [s autorelease];
 }
 
 #pragma mark Override
 
-- (void) dealloc
+- (void)dealloc
 {
-    TECDisposeConverter(converter_);
+	TECDisposeConverter(converter_);
 	[super dealloc];
 }
 
@@ -115,92 +115,95 @@
 
 @implementation TECSniffer
 
-- (NSArray*) sniff: (NSData*) data
-{    
-    OSStatus status;
-    
-    ItemCount* encodings;
-    ItemCount* errors;
-    ItemCount* features;
-    ItemCount numErrors, numFeatures;
-    
-    numErrors = numFeatures = numEncodings_;
-    
-    encodings = malloc(sizeof(TextEncoding) * numEncodings_);
-    memcpy(encodings, encodings_, sizeof(TextEncoding) * numEncodings_);
-    
-    errors = malloc(sizeof(ItemCount) * numErrors);
-    features = malloc(sizeof(ItemCount) * numFeatures);
-    
-    status = TECSniffTextEncoding(sniffer_,
-                                  [data bytes],
-                                  [data length],
-                                  encodings,
-                                  numEncodings_,
-                                  errors,
-                                  numErrors,
-                                  features,
-                                  numFeatures);
-    
-    if (status != noErr) {
-        NSLog(@"TECSniffer - sniff: / Failed to sniff text encoding.");
-    }
-    
-	NSMutableArray* result = [NSMutableArray array];
+- (NSArray *) sniff:(NSData *)data
+{
+	OSStatus status;
+	
+	ItemCount *encodings;
+	ItemCount *errors;
+	ItemCount *features;
+	ItemCount numErrors, numFeatures;
+	
+	numErrors = numFeatures = numEncodings_;
+	
+	encodings = malloc(sizeof(TextEncoding) * numEncodings_);
+	memcpy(encodings, encodings_, sizeof(TextEncoding) * numEncodings_);
+	
+	errors = malloc(sizeof(ItemCount) * numErrors);
+	features = malloc(sizeof(ItemCount) * numFeatures);
+	
+	status = TECSniffTextEncoding(sniffer_,
+	                              [data bytes],
+	                              [data length],
+	                              encodings,
+	                              numEncodings_,
+	                              errors,
+	                              numErrors,
+	                              features,
+	                              numFeatures);
+	
+	if (status != noErr) {
+		NSLog(@"TECSniffer - sniff: / Failed to sniff text encoding.");
+	}
+	
+	NSMutableArray *result = [NSMutableArray array];
 	int i;
 	for (i = 0; i < numEncodings_; i++) {
 		NSStringEncoding e = CFStringConvertEncodingToNSStringEncoding(encodings[i]);
-		[result addObject: [NSNumber numberWithUnsignedInt: e]];
+		[result addObject:[NSNumber numberWithUnsignedInt:e]];
 	}
-    
-    free(encodings);
-    free(errors);
-    free(features);
 	
-    return result;
+	free(encodings);
+	free(errors);
+	free(features);
+	
+	return result;
 }
 
 - (void) clear
 {
-    TECClearSnifferContextInfo(sniffer_);
+	TECClearSnifferContextInfo(sniffer_);
 }
 
 #pragma mark Override
 - (id) init
 {
-    self = [super init];
-    if (! self) {
-        return nil;
-    }
-    
-    OSStatus status;
-    ItemCount actualCount;
-    
-    status = TECCountAvailableTextEncodings(&numEncodings_);
-    if (status != noErr)
-        return nil;
-    
-    encodings_ = (TextEncoding*) malloc(sizeof(TextEncoding) * numEncodings_);
-    
-    status = TECGetAvailableTextEncodings(encodings_,
-                                          numEncodings_,
-                                          &actualCount);
-    if (status != noErr)
-        return nil;
-    
-    numEncodings_ = actualCount;
-    
-    status = TECCreateSniffer(&sniffer_, encodings_, numEncodings_);
-    if (status != noErr)
-        return nil;
-    
-    return self;
+	self = [super init];
+	if (!self) {
+		return nil;
+	}
+	
+	OSStatus status;
+	ItemCount actualCount;
+	
+	status = TECCountAvailableTextEncodings(&numEncodings_);
+	if (status != noErr) {
+		return nil;
+	}
+	
+	encodings_ = (TextEncoding *)malloc(sizeof(TextEncoding) * numEncodings_);
+	
+	status = TECGetAvailableTextEncodings(encodings_,
+	                                      numEncodings_,
+	                                      &actualCount);
+	if (status != noErr) {
+		return nil;
+	}
+	
+	numEncodings_ = actualCount;
+	
+	status = TECCreateSniffer(&sniffer_, encodings_, numEncodings_);
+	if (status != noErr) {
+		return nil;
+	}
+	
+	return self;
 }
 
 - (void) dealloc
 {
-    free(encodings_);
-    TECDisposeSniffer(sniffer_);
+	free(encodings_);
+	TECDisposeSniffer(sniffer_);
 	
 	[super dealloc];
 }

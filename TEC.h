@@ -26,28 +26,28 @@
 #import <Cocoa/Cocoa.h>
 
 @interface TECConverter : NSObject {
-    TextEncoding from_;
-    TextEncoding to_;
-    TECObjectRef converter_;
+	TextEncoding from_;
+	TextEncoding to_;
+	TECObjectRef converter_;
 }
 
-- (id) initWithEncoding: (NSStringEncoding) from
-                     to: (NSStringEncoding) to;
-- (id) initWithEncoding: (NSStringEncoding) from;
+- (id)initWithEncoding:(NSStringEncoding)from
+					to:(NSStringEncoding)to;
+- (id)initWithEncoding:(NSStringEncoding)from;
 
-- (NSData*) convert: (NSData*) source;
-- (NSString*) convertToString: (NSData*) source;
+- (NSData *)convert:(NSData *)source;
+- (NSString *)convertToString:(NSData *)source;
 @end
 
 
 @interface TECSniffer : NSObject {
-    TextEncoding* encodings_;
-    ItemCount numEncodings_;
-    TECSnifferObjectRef sniffer_;
+	TextEncoding *encodings_;
+	ItemCount numEncodings_;
+	TECSnifferObjectRef sniffer_;
 }
 
-- (id) init;
+- (id)init;
 
-- (NSArray*) sniff: (NSData*) data;
-- (void) clear;
+- (NSArray *)sniff:(NSData *)data;
+- (void)clear;
 @end
